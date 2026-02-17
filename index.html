@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Control Temu (Nube)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <!-- ===================== -->
+  <!-- TOPBAR -->
+  <!-- ===================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">T</div>
+      <div>
+        <div class="title">Control Temu</div>
+        <div class="subtitle">Pedidos por persona · Abonos · Resumen automático</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btnExportReg" class="btn ghost hidden">Exportar Registros CSV</button>
+      <button id="btnExportSum" class="btn ghost hidden">Exportar Resumen CSV</button>
+      <button id="btnLogout" class="btn danger hidden">Salir</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ===================== -->
+    <!-- AUTH -->
+    <!-- ===================== -->
+    <section id="authCard" class="card">
+      <h2>Iniciar sesión</h2>
+      <p class="muted">Te mandamos un link al correo (Magic Link). Entrás y listo.</p>
+
+      <div class="row">
+        <input id="email" type="email" placeholder="tu correo" autocomplete="email" />
+        <button id="btnLogin" class="btn primary">Enviar link</button>
+      </div>
+
+      <div id="authMsg" class="msg"></div>
+
+      <details class="help">
+        <summary>¿No llega el correo?</summary>
+        <ul>
+          <li>Revisá Spam / Promociones.</li>
+          <li>En Supabase → Authentication → Providers → Email, confirmá que esté activado.</li>
+          <li>En Supabase → Auth → URL Configuration, que el Site URL/Redirect coincida con tu host.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- ===================== -->
+    <!-- APP -->
+    <!-- ===================== -->
+    <section id="app" class="hidden">
+
+      <!-- ===================== -->
+      <!-- 1) KPIs -->
+      <!-- ===================== -->
+      <section class="grid kpis">
+        <div class="card kpi">
+          <div class="kpi-label">Total vendido</div>
+          <div id="kpiTotal" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Total abonado</div>
+          <div id="kpiAbonado" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Saldo pendiente</div>
+          <div id="kpiSaldo" class="kpi-value">$0.00</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">Pedidos (IDs únicos)</div>
+          <div id="kpiPedidos" class="kpi-value">0</div>
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- 2) FORMULARIO -->
+      <!-- ===================== -->
+      <section class="card">
+        <div class="row space">
+          <h2 id="formTitle">Agregar registro</h2>
+          <div class="row">
+            <button id="btnClear" class="btn ghost">Limpiar</button>
+            <button id="btnSave" class="btn primary">Guardar</button>
+          </div>
+        </div>
+
+        <div class="grid form">
+          <div>
+            <label>ID Pedido</label>
+            <input id="pedido_id" placeholder="Ej: PD1202" />
+          </div>
+
+          <div>
+            <label>Fecha</label>
+            <input id="fecha" type="date" />
+          </div>
+
+          <div>
+            <label>Persona</label>
+            <input id="persona" placeholder="Ej: Mamá" />
+          </div>
+
+          <div>
+            <label>Total ($)</label>
+            <input id="total" type="number" step="0.01" min="0" placeholder="0.00" />
+          </div>
+
+          <div>
+            <label>Abonado ($)</label>
+            <input id="abonado" type="number" step="0.01" min="0" placeholder="0.00" />
+          </div>
+
+          <div>
+            <label>Notas (opcional)</label>
+            <input id="notas" placeholder="Ej: Esperando..." />
+          </div>
+        </div>
+
+        <div class="muted small">
+          Tip: Podés repetir el mismo ID para varias personas. El resumen lo agrupa solo.
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- 3) FILTROS + TABLA REGISTROS -->
+      <!-- ===================== -->
+      <section class="card">
+        <div class="row space">
+          <h2>Registros</h2>
+          <div class="row">
+            <button id="btnRefresh" class="btn ghost">Actualizar</button>
+          </div>
+        </div>
+
+        <div class="grid filters">
+          <div>
+            <label>Buscar (ID o Persona)</label>
+            <input id="q" placeholder="Ej: PD1202 o Mamá" />
+          </div>
+
+          <div>
+            <label>Estado</label>
+            <select id="estado">
+              <option value="">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Pagado">Pagado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Orden</label>
+            <select id="order">
+              <option value="created_desc">Más reciente</option>
+              <option value="created_asc">Más antiguo</option>
+              <option value="fecha_desc">Fecha ↓</option>
+              <option value="fecha_asc">Fecha ↑</option>
+              <option value="pedido_asc">Pedido A→Z</option>
+              <option value="persona_asc">Persona A→Z</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pedido</th>
+                <th>Fecha</th>
+                <th>Persona</th>
+                <th>Total</th>
+                <th>Abonado</th>
+                <th>Saldo</th>
+                <th>Estado</th>
+                <th>Notas</th>
+                <th class="ta-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyRows" class="empty hidden">No hay registros con esos filtros.</div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- 4) RESUMENES (UNO ABAJO DEL OTRO) -->
+      <!-- ===================== -->
+      <section class="grid one">
+        <!-- Resumen por pedido -->
+        <section class="card">
+          <div class="row space">
+            <h2>Resumen por pedido</h2>
+            <span class="pill">IDs únicos</span>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Total</th>
+                  <th>Abonado</th>
+                  <th>Saldo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="sumPedidos"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Resumen por persona -->
+        <section class="card">
+          <div class="row space">
+            <h2>Resumen por persona</h2>
+            <span class="pill">Acumulado</span>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Persona</th>
+                  <th>Total</th>
+                  <th>Abonado</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody id="sumPersonas"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- ===================== -->
+      <!-- 5) MODAL EDIT -->
+      <!-- ===================== -->
+      <div id="modal" class="modal hidden">
+        <div class="modal-card">
+          <div class="row space">
+            <h3>Editar registro</h3>
+            <button id="btnClose" class="btn ghost">Cerrar</button>
+          </div>
+
+          <div class="grid form">
+            <div>
+              <label>ID Pedido</label>
+              <input id="m_pedido_id" />
+            </div>
+            <div>
+              <label>Fecha</label>
+              <input id="m_fecha" type="date" />
+            </div>
+            <div>
+              <label>Persona</label>
+              <input id="m_persona" />
+            </div>
+            <div>
+              <label>Total ($)</label>
+              <input id="m_total" type="number" step="0.01" min="0" />
+            </div>
+            <div>
+              <label>Abonado ($)</label>
+              <input id="m_abonado" type="number" step="0.01" min="0" />
+            </div>
+            <div>
+              <label>Notas</label>
+              <input id="m_notas" />
+            </div>
+          </div>
+
+          <div class="row space">
+            <button id="btnDelete" class="btn danger">Eliminar</button>
+            <button id="btnUpdate" class="btn primary">Guardar cambios</button>
+          </div>
+
+          <div id="modalMsg" class="msg"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="muted">Hecho para controlar pedidos Temu · Supabase + JS</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
