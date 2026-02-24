@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Control Temu (Nube)</title>
+  <title>Control Pedidos</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0b1020">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-  <!-- ===================== -->
-  <!-- TOPBAR -->
-  <!-- ===================== -->
   <header class="topbar">
     <div class="brand">
       <div class="logo">T</div>
       <div>
-        <div class="title">Control Temu</div>
+        <div class="title">Control Pedidos</div>
         <div class="subtitle">Pedidos por persona · Abonos · Resumen automático</div>
       </div>
     </div>
@@ -24,43 +24,34 @@
     <div class="top-actions">
       <button id="btnExportReg" class="btn ghost hidden">Exportar Registros CSV</button>
       <button id="btnExportSum" class="btn ghost hidden">Exportar Resumen CSV</button>
+      <button id="btnInstall" class="btn ghost hidden">Instalar App</button>
       <button id="btnLogout" class="btn danger hidden">Salir</button>
     </div>
   </header>
 
   <main class="container">
-    <!-- ===================== -->
     <!-- AUTH -->
-    <!-- ===================== -->
     <section id="authCard" class="card">
       <h2>Iniciar sesión</h2>
-      <p class="muted">Te mandamos un link al correo (Magic Link). Entrás y listo.</p>
 
       <div class="row">
-        <input id="email" type="email" placeholder="tu correo" autocomplete="email" />
-        <button id="btnLogin" class="btn primary">Enviar link</button>
+        <input id="username" type="text" placeholder="Ingrese su Usuario" autocomplete="username"/>
+        <input id="password" type="password" placeholder="Ingrese su Contraseña" autocomplete="current-password"/>
+      </div>
+
+      <br>
+
+      <div class="row">
+        <button id="btnLoginUser" class="btn primary">Entrar</button>
       </div>
 
       <div id="authMsg" class="msg"></div>
-
-      <details class="help">
-        <summary>¿No llega el correo?</summary>
-        <ul>
-          <li>Revisá Spam / Promociones.</li>
-          <li>En Supabase → Authentication → Providers → Email, confirmá que esté activado.</li>
-          <li>En Supabase → Auth → URL Configuration, que el Site URL/Redirect coincida con tu host.</li>
-        </ul>
-      </details>
     </section>
 
-    <!-- ===================== -->
     <!-- APP -->
-    <!-- ===================== -->
     <section id="app" class="hidden">
 
-      <!-- ===================== -->
-      <!-- 1) KPIs -->
-      <!-- ===================== -->
+      <!-- KPIs -->
       <section class="grid kpis">
         <div class="card kpi">
           <div class="kpi-label">Total vendido</div>
@@ -80,9 +71,7 @@
         </div>
       </section>
 
-      <!-- ===================== -->
-      <!-- 2) FORMULARIO -->
-      <!-- ===================== -->
+      <!-- FORM -->
       <section class="card">
         <div class="row space">
           <h2 id="formTitle">Agregar registro</h2>
@@ -129,9 +118,7 @@
         </div>
       </section>
 
-      <!-- ===================== -->
-      <!-- 3) FILTROS + TABLA REGISTROS -->
-      <!-- ===================== -->
+      <!-- REGISTROS -->
       <section class="card">
         <div class="row space">
           <h2>Registros</h2>
@@ -168,6 +155,14 @@
           </div>
         </div>
 
+        <div class="row" style="margin-top:10px;">
+          <label class="switch">
+            <input id="showClosed" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <span class="switch-text">Mostrar pedidos cerrados</span>
+        </div>
+
         <div class="tableWrap">
           <table>
             <thead>
@@ -190,18 +185,15 @@
         <div id="emptyRows" class="empty hidden">No hay registros con esos filtros.</div>
       </section>
 
-      <!-- ===================== -->
-      <!-- 4) RESUMENES (UNO ABAJO DEL OTRO) -->
-      <!-- ===================== -->
+      <!-- RESUMENES -->
       <section class="grid one">
-        <!-- Resumen por pedido -->
         <section class="card">
           <div class="row space">
             <h2>Resumen por pedido</h2>
             <span class="pill">IDs únicos</span>
           </div>
 
-          <div class="tableWrap">
+          <div class="tableWrap forceScroll">
             <table>
               <thead>
                 <tr>
@@ -210,6 +202,7 @@
                   <th>Abonado</th>
                   <th>Saldo</th>
                   <th>Estado</th>
+                  <th class="ta-right">Acción</th>
                 </tr>
               </thead>
               <tbody id="sumPedidos"></tbody>
@@ -217,14 +210,13 @@
           </div>
         </section>
 
-        <!-- Resumen por persona -->
         <section class="card">
           <div class="row space">
             <h2>Resumen por persona</h2>
             <span class="pill">Acumulado</span>
           </div>
 
-          <div class="tableWrap">
+          <div class="tableWrap forceScroll">
             <table>
               <thead>
                 <tr>
@@ -232,6 +224,7 @@
                   <th>Total</th>
                   <th>Abonado</th>
                   <th>Saldo</th>
+                  <th>Estado</th>
                 </tr>
               </thead>
               <tbody id="sumPersonas"></tbody>
@@ -240,9 +233,7 @@
         </section>
       </section>
 
-      <!-- ===================== -->
-      <!-- 5) MODAL EDIT -->
-      <!-- ===================== -->
+      <!-- MODAL EDIT -->
       <div id="modal" class="modal hidden">
         <div class="modal-card">
           <div class="row space">
@@ -251,30 +242,12 @@
           </div>
 
           <div class="grid form">
-            <div>
-              <label>ID Pedido</label>
-              <input id="m_pedido_id" />
-            </div>
-            <div>
-              <label>Fecha</label>
-              <input id="m_fecha" type="date" />
-            </div>
-            <div>
-              <label>Persona</label>
-              <input id="m_persona" />
-            </div>
-            <div>
-              <label>Total ($)</label>
-              <input id="m_total" type="number" step="0.01" min="0" />
-            </div>
-            <div>
-              <label>Abonado ($)</label>
-              <input id="m_abonado" type="number" step="0.01" min="0" />
-            </div>
-            <div>
-              <label>Notas</label>
-              <input id="m_notas" />
-            </div>
+            <div><label>ID Pedido</label><input id="m_pedido_id" /></div>
+            <div><label>Fecha</label><input id="m_fecha" type="date" /></div>
+            <div><label>Persona</label><input id="m_persona" /></div>
+            <div><label>Total ($)</label><input id="m_total" type="number" step="0.01" min="0" /></div>
+            <div><label>Abonado ($)</label><input id="m_abonado" type="number" step="0.01" min="0" /></div>
+            <div><label>Notas</label><input id="m_notas" /></div>
           </div>
 
           <div class="row space">
@@ -285,13 +258,14 @@
           <div id="modalMsg" class="msg"></div>
         </div>
       </div>
-
     </section>
   </main>
 
   <footer class="footer">
-    <span class="muted">Hecho para controlar pedidos Temu · Supabase + JS</span>
+    <span class="muted">Andres Ortiz · Derechos Reservados · Supabase + JS</span>
   </footer>
+
+  <div id="toasts" class="toasts"></div>
 
   <script src="app.js"></script>
 </body>
