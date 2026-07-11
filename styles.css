@@ -376,3 +376,83 @@ table tbody td.ta-right{ text-align:center !important; }
 body.modal-open{
   overflow: hidden;
 }
+/* ===== Productos por registro ===== */
+.products-box{
+  margin-top:16px;
+  margin-bottom:14px;
+  padding:14px;
+  border:1px solid #223047;
+  border-radius:16px;
+  background:rgba(11,18,32,.55);
+}
+.products-heading{margin-bottom:12px}
+.products-heading h3{margin:0 0 4px}
+.product-form{
+  grid-template-columns:minmax(180px,2fr) minmax(100px,.7fr) minmax(130px,1fr) auto;
+  align-items:end;
+}
+.product-add-wrap{display:flex;align-items:end}
+.product-add-wrap .btn{width:100%;white-space:nowrap}
+.product-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.product-item{
+  display:grid;
+  grid-template-columns:minmax(160px,1fr) auto auto;
+  gap:12px;
+  align-items:center;
+  padding:10px 12px;
+  border:1px solid #1f2b40;
+  border-radius:12px;
+  background:#0b1220;
+}
+.product-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.product-main strong{overflow-wrap:anywhere}
+.product-subtotal{font-weight:900;white-space:nowrap}
+.product-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.btn-sm{padding:7px 9px;font-size:.8rem}
+.auto-total{background:rgba(79,70,229,.12);cursor:not-allowed}
+.products-cell{min-width:260px;max-width:380px;white-space:normal;line-height:1.4}
+.modal-products{margin-top:14px}
+.modal-actions{margin-top:14px}
+
+@media (max-width:760px){
+  .product-form{grid-template-columns:1fr 1fr}
+  .product-form > div:first-child{grid-column:1 / -1}
+  .product-add-wrap{grid-column:1 / -1}
+  .product-item{grid-template-columns:1fr auto}
+  .product-actions{grid-column:1 / -1;justify-content:stretch}
+  .product-actions .btn{flex:1}
+  .products-heading{align-items:flex-start;flex-direction:column}
+}
+
+@media (max-width:480px){
+  .product-form{grid-template-columns:1fr}
+  .product-form > div:first-child,
+  .product-add-wrap{grid-column:auto}
+}
+
+.products-cell{
+  min-width: 260px;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.product-line{
+  display: block;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+
+.product-line:last-child{
+  margin-bottom: 0;
+}
+
+.record-actions{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 82px;
+}
+
+.record-actions .btn{
+  width: 100%;
+}

@@ -113,6 +113,37 @@
           </div>
         </div>
 
+        <section class="products-box" aria-labelledby="productsTitle">
+          <div class="row space products-heading">
+            <div>
+              <h3 id="productsTitle">Productos del registro</h3>
+              <div class="muted small">Agregá el desglose y el total se calculará automáticamente.</div>
+            </div>
+            <span id="productsTotal" class="pill">Total: $0.00</span>
+          </div>
+
+          <div class="grid product-form">
+            <div>
+              <label>Producto</label>
+              <input id="p_producto" placeholder="Ej: Camisa" />
+            </div>
+            <div>
+              <label>Cantidad</label>
+              <input id="p_cantidad" type="number" min="1" step="1" value="1" />
+            </div>
+            <div>
+              <label>Precio unitario ($)</label>
+              <input id="p_precio" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div class="product-add-wrap">
+              <button id="btnAddProduct" class="btn ghost" type="button">Agregar producto</button>
+            </div>
+          </div>
+
+          <div id="productDraftEmpty" class="empty small">Todavía no agregaste productos.</div>
+          <div id="productDraftList" class="product-list"></div>
+        </section>
+
         <div class="muted small">
           Tip: Podés repetir el mismo ID para varias personas. El resumen lo agrupa solo.
         </div>
@@ -175,6 +206,7 @@
                 <th>Saldo</th>
                 <th>Estado</th>
                 <th>Notas</th>
+                <th>Productos</th>
                 <th class="ta-right">Acciones</th>
               </tr>
             </thead>
@@ -250,7 +282,38 @@
             <div><label>Notas</label><input id="m_notas" /></div>
           </div>
 
-          <div class="row space">
+          <section class="products-box modal-products" aria-labelledby="modalProductsTitle">
+            <div class="row space products-heading">
+              <div>
+                <h3 id="modalProductsTitle">Productos del registro</h3>
+                <div class="muted small">Podés agregar, editar o quitar productos antes de guardar.</div>
+              </div>
+              <span id="m_productsTotal" class="pill">Total: $0.00</span>
+            </div>
+
+            <div class="grid product-form">
+              <div>
+                <label>Producto</label>
+                <input id="mp_producto" placeholder="Ej: Pantalón" />
+              </div>
+              <div>
+                <label>Cantidad</label>
+                <input id="mp_cantidad" type="number" min="1" step="1" value="1" />
+              </div>
+              <div>
+                <label>Precio unitario ($)</label>
+                <input id="mp_precio" type="number" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="product-add-wrap">
+                <button id="btnModalAddProduct" class="btn ghost" type="button">Agregar producto</button>
+              </div>
+            </div>
+
+            <div id="modalProductEmpty" class="empty small">Este registro todavía no tiene productos.</div>
+            <div id="modalProductList" class="product-list"></div>
+          </section>
+
+          <div class="row space modal-actions">
             <button id="btnDelete" class="btn danger">Eliminar</button>
             <button id="btnUpdate" class="btn primary">Guardar cambios</button>
           </div>
@@ -267,6 +330,6 @@
 
   <div id="toasts" class="toasts"></div>
 
-  <script src="app.js"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

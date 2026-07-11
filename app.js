@@ -8,6 +8,162 @@ const on = (id, evt, fn) => { const el = $(id); if (el) el.addEventListener(evt,
 let currentEditId = null;
 let cache = [];
 let closedSet = new Set();
+let productsByRecord = new Map();
+let newProducts = [];
+let modalProducts = [];
+let originalModalProductIds = new Set();
+let productEditIndex = -1;
+let modalProductEditIndex = -1;
+
+
+// ===== PRODUCTOS =====
+const escHtml = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
+
+const productSubtotal = (p) => num(p.cantidad) * num(p.precio_unitario);
+const productsTotal = (items) => items.reduce((sum, p) => sum + productSubtotal(p), 0);
+const recordKey = (id) => String(id);
+const productsForRecord = (id) => productsByRecord.get(recordKey(id)) || [];
+
+function resetProductInputs(mode){
+  const modal = mode === "modal";
+  const ids = modal
+    ? { product:"mp_producto", qty:"mp_cantidad", price:"mp_precio", button:"btnModalAddProduct" }
+    : { product:"p_producto", qty:"p_cantidad", price:"p_precio", button:"btnAddProduct" };
+  if ($(ids.product)) $(ids.product).value = "";
+  if ($(ids.qty)) $(ids.qty).value = "1";
+  if ($(ids.price)) $(ids.price).value = "";
+  if ($(ids.button)) $(ids.button).textContent = "Agregar producto";
+  if (modal) modalProductEditIndex = -1;
+  else productEditIndex = -1;
+}
+
+function renderProductEditor(mode){
+  const modal = mode === "modal";
+  const items = modal ? modalProducts : newProducts;
+  const list = $(modal ? "modalProductList" : "productDraftList");
+  const empty = $(modal ? "modalProductEmpty" : "productDraftEmpty");
+  const totalPill = $(modal ? "m_productsTotal" : "productsTotal");
+  const totalInput = $(modal ? "m_total" : "total");
+
+  if (list) list.innerHTML = "";
+  empty?.classList.toggle("hidden", items.length > 0);
+
+  items.forEach((item, index) => {
+    const row = document.createElement("div");
+    row.className = "product-item";
+    row.innerHTML = `
+      <div class="product-main">
+        <strong>${escHtml(item.producto)}</strong>
+        <span class="muted small">${num(item.cantidad)} × ${money(item.precio_unitario)}</span>
+      </div>
+      <div class="product-subtotal">${money(productSubtotal(item))}</div>
+      <div class="product-actions">
+        <button class="btn ghost btn-sm" type="button" data-product-edit="${index}">Editar</button>
+        <button class="btn danger btn-sm" type="button" data-product-delete="${index}">Quitar</button>
+      </div>`;
+
+    row.querySelector(`[data-product-edit="${index}"]`)?.addEventListener("click", () => {
+      const prefix = modal ? "mp" : "p";
+      if ($(`${prefix}_producto`)) $(`${prefix}_producto`).value = item.producto;
+      if ($(`${prefix}_cantidad`)) $(`${prefix}_cantidad`).value = item.cantidad;
+      if ($(`${prefix}_precio`)) $(`${prefix}_precio`).value = item.precio_unitario;
+      if ($(modal ? "btnModalAddProduct" : "btnAddProduct")) {
+        $(modal ? "btnModalAddProduct" : "btnAddProduct").textContent = "Actualizar producto";
+      }
+      if (modal) modalProductEditIndex = index;
+      else productEditIndex = index;
+    });
+
+    row.querySelector(`[data-product-delete="${index}"]`)?.addEventListener("click", () => {
+      items.splice(index, 1);
+      resetProductInputs(mode);
+      renderProductEditor(mode);
+    });
+    list?.appendChild(row);
+  });
+
+  const totalValue = productsTotal(items);
+  if (totalPill) totalPill.textContent = `Total: ${money(totalValue)}`;
+  if (totalInput) {
+    totalInput.readOnly = items.length > 0;
+    totalInput.classList.toggle("auto-total", items.length > 0);
+    if (items.length > 0) totalInput.value = totalValue.toFixed(2);
+  }
+}
+
+function addOrUpdateProduct(mode){
+  const modal = mode === "modal";
+  const prefix = modal ? "mp" : "p";
+  const items = modal ? modalProducts : newProducts;
+  const product = $(`${prefix}_producto`)?.value.trim() || "";
+  const quantity = Math.max(1, Math.trunc(num($(`${prefix}_cantidad`)?.value)));
+  const price = num($(`${prefix}_precio`)?.value);
+
+  if (!product) return notify("Escribí el nombre del producto.", "warn");
+  if (price < 0) return notify("El precio no puede ser negativo.", "warn");
+
+  const item = { producto: product, cantidad: quantity, precio_unitario: price };
+  const index = modal ? modalProductEditIndex : productEditIndex;
+  if (index >= 0 && items[index]) items[index] = { ...items[index], ...item };
+  else items.push(item);
+
+  resetProductInputs(mode);
+  renderProductEditor(mode);
+}
+
+on("btnAddProduct", "click", () => addOrUpdateProduct("new"));
+on("btnModalAddProduct", "click", () => addOrUpdateProduct("modal"));
+
+async function insertProducts(recordId, pedidoId, items, userId){
+  if (!items.length) return null;
+  const rows = items.map(p => ({
+    user_id: userId,
+    registro_id: recordKey(recordId),
+    pedido_id: pedidoId,
+    producto: p.producto,
+    cantidad: Math.max(1, Math.trunc(num(p.cantidad))),
+    precio_unitario: num(p.precio_unitario)
+  }));
+  const { error } = await sb.from("productos_pedido").insert(rows);
+  return error;
+}
+
+async function syncModalProducts(recordId, pedidoId, userId){
+  const keptIds = new Set(modalProducts.filter(p => p.id != null).map(p => String(p.id)));
+  const removedIds = [...originalModalProductIds].filter(id => !keptIds.has(String(id)));
+
+  for (const p of modalProducts.filter(p => p.id != null)) {
+    const { error } = await sb.from("productos_pedido").update({
+      pedido_id: pedidoId,
+      producto: p.producto,
+      cantidad: Math.max(1, Math.trunc(num(p.cantidad))),
+      precio_unitario: num(p.precio_unitario)
+    }).eq("id", p.id).eq("user_id", userId);
+    if (error) return error;
+  }
+
+  const newItems = modalProducts.filter(p => p.id == null);
+  const insertError = await insertProducts(recordId, pedidoId, newItems, userId);
+  if (insertError) return insertError;
+
+  if (removedIds.length) {
+    const { error } = await sb.from("productos_pedido")
+      .delete().in("id", removedIds).eq("user_id", userId);
+    if (error) return error;
+  }
+  return null;
+}
+
+function productsTextForRecord(id){
+  return productsForRecord(id)
+    .map(p => `${num(p.cantidad)} ${p.producto} × ${money(p.precio_unitario)} = ${money(productSubtotal(p))}`)
+    .join("\n");
+}
 
 // ===== PWA: registrar SW =====
 if ("serviceWorker" in navigator) {
@@ -179,6 +335,8 @@ on("btnLogout","click", async () => {
   clearForm();
   cache = [];
   closedSet = new Set();
+  productsByRecord = new Map();
+  newProducts = [];
   render();
   showAuthed(false);
 
@@ -206,6 +364,9 @@ function clearForm(){
   if ($("total")) $("total").value = "";
   if ($("abonado")) $("abonado").value = "";
   if ($("notas")) $("notas").value = "";
+  newProducts = [];
+  resetProductInputs("new");
+  renderProductEditor("new");
 }
 
 on("btnClear","click", clearForm);
@@ -217,24 +378,9 @@ on("btnSave","click", async () => {
   const r = readForm();
   if (!r.pedido_id || !r.persona) return notify("Falta ID Pedido o Persona.", "warn");
   if (closedSet.has(r.pedido_id)) return notify("Ese pedido está CERRADO.", "warn");
+  if (newProducts.length) r.total = productsTotal(newProducts);
 
-  if (currentEditId){
-    const { data: row } = await sb.from("temu_pedidos").select("pedido_id").eq("id", currentEditId).maybeSingle();
-    if (row?.pedido_id && closedSet.has(row.pedido_id)) return notify("Pedido CERRADO: no se puede editar.", "warn");
-
-    const { error } = await sb.from("temu_pedidos").update({
-      pedido_id: r.pedido_id, fecha: r.fecha, persona: r.persona,
-      total: r.total, abonado: r.abonado, notas: r.notas
-    }).eq("id", currentEditId);
-
-    if (error) return notify("Error: " + error.message, "error");
-
-    clearForm();
-    await load();
-    return notify("Registro actualizado ✅", "success");
-  }
-
-  const { error } = await sb.from("temu_pedidos").insert([{
+  const { data: inserted, error } = await sb.from("temu_pedidos").insert([{
     user_id: user.id,
     pedido_id: r.pedido_id,
     fecha: r.fecha,
@@ -242,17 +388,23 @@ on("btnSave","click", async () => {
     total: r.total,
     abonado: r.abonado,
     notas: r.notas
-  }]);
+  }]).select("id").single();
 
   if (error) return notify("Error guardando: " + error.message, "error");
 
-  if ($("persona")) $("persona").value = "";
-  if ($("total")) $("total").value = "";
-  if ($("abonado")) $("abonado").value = "";
-  if ($("notas")) $("notas").value = "";
+  const productError = await insertProducts(inserted.id, r.pedido_id, newProducts, user.id);
+  if (productError) {
+    return notify("El registro se guardó, pero los productos no: " + productError.message, "error", 6000);
+  }
+
+  const keepPedido = r.pedido_id;
+  const keepFecha = r.fecha;
+  clearForm();
+  if ($("pedido_id")) $("pedido_id").value = keepPedido;
+  if ($("fecha")) $("fecha").value = keepFecha || "";
 
   await load();
-  notify("Registro guardado ✅", "success");
+  notify("Registro y productos guardados ✅", "success");
 });
 
 async function removeRow(id){
@@ -264,6 +416,13 @@ async function removeRow(id){
 
   const { error } = await sb.from("temu_pedidos").delete().eq("id", id);
   if (error) return notify("Error: " + error.message, "error");
+
+  const user = await getUser();
+  if (user) {
+    const { error: productDeleteError } = await sb.from("productos_pedido")
+      .delete().eq("registro_id", recordKey(id)).eq("user_id", user.id);
+    if (productDeleteError) console.warn("No se pudieron limpiar productos huérfanos:", productDeleteError);
+  }
 
   await load();
   notify("Registro eliminado.", "info");
@@ -286,36 +445,57 @@ function openModal(row){
   if ($("m_total")) $("m_total").value = row.total ?? 0;
   if ($("m_abonado")) $("m_abonado").value = row.abonado ?? 0;
   if ($("m_notas")) $("m_notas").value = row.notas ?? "";
+
+  modalProducts = productsForRecord(row.id).map(p => ({ ...p }));
+  originalModalProductIds = new Set(modalProducts.filter(p => p.id != null).map(p => String(p.id)));
+  resetProductInputs("modal");
+  renderProductEditor("modal");
 }
 
 on("btnClose", "click", () => {
   $("modal")?.classList.add("hidden");
   document.body.classList.remove("modal-open");
   currentEditId = null;
+  modalProducts = [];
+  originalModalProductIds = new Set();
+  resetProductInputs("modal");
 });
 
 on("btnUpdate","click", async () => {
   if (!currentEditId) return;
+  const user = await getUser();
+  if (!user) return;
 
+  const originalRow = cache.find(x => x.id === currentEditId);
   const payload = {
     pedido_id: $("m_pedido_id")?.value.trim() || "",
     fecha: $("m_fecha")?.value || null,
     persona: $("m_persona")?.value.trim() || "",
-    total: num($("m_total")?.value),
+    total: modalProducts.length ? productsTotal(modalProducts) : num($("m_total")?.value),
     abonado: num($("m_abonado")?.value),
     notas: $("m_notas")?.value.trim() || null
   };
 
   if (!payload.pedido_id || !payload.persona) return ($("modalMsg").textContent = "Falta ID o Persona.");
-  if (closedSet.has(payload.pedido_id)) return ($("modalMsg").textContent = "Pedido CERRADO: no se puede editar.");
+  if (originalRow?.pedido_id && closedSet.has(originalRow.pedido_id)) return ($("modalMsg").textContent = "Pedido CERRADO: no se puede editar.");
+  if (closedSet.has(payload.pedido_id)) return ($("modalMsg").textContent = "El nuevo ID pertenece a un pedido cerrado.");
 
   const { error } = await sb.from("temu_pedidos").update(payload).eq("id", currentEditId);
   if (error) return ($("modalMsg").textContent = error.message);
 
+  const productError = await syncModalProducts(currentEditId, payload.pedido_id, user.id);
+  if (productError) {
+    $("modalMsg").textContent = "El registro se actualizó, pero hubo un problema con los productos: " + productError.message;
+    return;
+  }
+
   $("modal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   currentEditId = null;
+  modalProducts = [];
+  originalModalProductIds = new Set();
   await load();
-  notify("Cambios guardados ✅", "success");
+  notify("Cambios y productos guardados ✅", "success");
 });
 
 on("btnDelete","click", async () => {
@@ -324,6 +504,7 @@ on("btnDelete","click", async () => {
   if (row?.pedido_id && closedSet.has(row.pedido_id)) return notify("Pedido CERRADO: no se puede borrar.", "warn");
   await removeRow(currentEditId);
   $("modal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
   currentEditId = null;
 });
 
@@ -394,9 +575,10 @@ on("btnExportReg","click", () => {
       abonado: r.abonado,
       saldo: saldo(r.total, r.abonado),
       estado: closedSet.has(r.pedido_id) ? "Cerrado" : estadoDe(saldo(r.total, r.abonado)),
-      notas: r.notas ?? ""
+      notas: r.notas ?? "",
+      productos: productsTextForRecord(r.id)
     }));
-  download("temu_registros.csv", toCSV(rows, ["pedido_id","fecha","persona","total","abonado","saldo","estado","notas"]));
+  download("temu_registros.csv", toCSV(rows, ["pedido_id","fecha","persona","total","abonado","saldo","estado","notas","productos"]));
   notify("CSV de registros descargado ✅", "success");
 });
 
@@ -491,17 +673,47 @@ function render(){
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r.pedido_id}</td>
-      <td>${r.fecha ?? ""}</td>
-      <td>${r.persona}</td>
+      <td>${escHtml(r.pedido_id)}</td>
+      <td>${escHtml(r.fecha ?? "")}</td>
+      <td>${escHtml(r.persona)}</td>
       <td>${money(r.total)}</td>
       <td>${money(r.abonado)}</td>
       <td>${money(s)}</td>
       <td><span class="tag ${estadoClassOf(est)}">${est}</span></td>
-      <td>${r.notas ?? ""}</td>
-      <td class="ta-right">
-        <button class="btn ghost btn-sm" data-edit="${r.id}" ${isClosed ? "disabled" : ""}>Editar</button>
-        <button class="btn danger btn-sm" data-del="${r.id}" ${isClosed ? "disabled" : ""}>Borrar</button>
+      <td>${escHtml(r.notas ?? "")}</td>
+      <td class="products-cell">
+        ${
+          productsForRecord(r.id).length
+            ? productsForRecord(r.id)
+                .map(p => `
+                  <div class="product-line">
+                    ${num(p.cantidad)} ${escHtml(p.producto)}
+                    × ${money(p.precio_unitario)}
+                    = ${money(productSubtotal(p))}
+                  </div>
+                `)
+                .join("")
+            : '<span class="muted">Sin desglose</span>'
+        }
+      </td>
+      <td>
+        <div class="record-actions">
+          <button
+            class="btn ghost btn-sm"
+            data-edit="${r.id}"
+            ${isClosed ? "disabled" : ""}
+          >
+            Editar
+          </button>
+
+          <button
+            class="btn danger btn-sm"
+            data-del="${r.id}"
+            ${isClosed ? "disabled" : ""}
+          >
+            Borrar
+          </button>
+        </div>
       </td>
     `;
 
@@ -600,9 +812,31 @@ async function load(){
     return;
   }
 
+  const { data: products, error: productError } = await sb
+    .from("productos_pedido")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+
+  if (productError){
+    console.error(productError);
+    notify("No se pudieron cargar los productos. Ejecutá el archivo SQL incluido: " + productError.message, "error", 6500);
+    productsByRecord = new Map();
+  } else {
+    productsByRecord = new Map();
+    for (const product of (products || [])) {
+      const key = recordKey(product.registro_id);
+      const list = productsByRecord.get(key) || [];
+      list.push(product);
+      productsByRecord.set(key, list);
+    }
+  }
+
   cache = data || [];
   render();
 }
+
+renderProductEditor("new");
 
 // ===== Boot =====
 (async () => {
