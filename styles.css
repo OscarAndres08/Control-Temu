@@ -340,3 +340,39 @@ table td:nth-child(8){ text-align:left; } /* Notas */
 /* Acciones siempre a la derecha (si tiene la clase ya) */
 table thead th.ta-right,
 table tbody td.ta-right{ text-align:center !important; }
+
+/* El modal siempre debe quedar por encima de tablas y encabezados */
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, .72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  backdrop-filter: blur(3px);
+}
+
+.modal-card{
+  position: relative;
+  z-index: 10001;
+  width: min(900px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .65);
+}
+
+/* Los encabezados sticky deben quedar debajo del modal */
+.tableWrap thead th{
+  z-index: 2;
+}
+
+body.modal-open{
+  overflow: hidden;
+}

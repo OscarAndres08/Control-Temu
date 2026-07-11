@@ -270,10 +270,14 @@ async function removeRow(id){
 }
 
 function openModal(row){
-  if (closedSet.has(row.pedido_id)) return notify("Pedido CERRADO: no se puede editar.", "warn");
+  if (closedSet.has(row.pedido_id)) {
+    return notify("Pedido CERRADO: no se puede editar.", "warn");
+  }
 
   currentEditId = row.id;
   $("modal")?.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+
   if ($("modalMsg")) $("modalMsg").textContent = "";
 
   if ($("m_pedido_id")) $("m_pedido_id").value = row.pedido_id ?? "";
@@ -284,7 +288,11 @@ function openModal(row){
   if ($("m_notas")) $("m_notas").value = row.notas ?? "";
 }
 
-on("btnClose","click", () => $("modal")?.classList.add("hidden"));
+on("btnClose", "click", () => {
+  $("modal")?.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  currentEditId = null;
+});
 
 on("btnUpdate","click", async () => {
   if (!currentEditId) return;
