@@ -497,3 +497,169 @@ body.modal-open{
 .record-actions .btn{
   width: 100%;
 }
+
+/* =====================================================
+   AJUSTES DE TABLAS Y PRODUCTOS
+   ===================================================== */
+
+/* Centrar la columna de productos */
+.products-cell{
+  text-align: center;
+  vertical-align: middle;
+}
+
+.product-line{
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 3px 0;
+  white-space: normal;
+}
+
+/* Centrar el encabezado Productos */
+.card:has(#rows) th:nth-child(8){
+  text-align: center;
+}
+
+
+/* =====================================================
+   COMPUTADORA
+   Evita la barra horizontal inferior
+   ===================================================== */
+
+@media (min-width: 900px){
+
+  .tableWrap{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .tableWrap table{
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .tableWrap th,
+  .tableWrap td{
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    vertical-align: middle;
+  }
+
+  /* Tabla principal de registros */
+  .card:has(#rows) th:nth-child(1),
+  .card:has(#rows) td:nth-child(1){
+    width: 10%;
+  }
+
+  .card:has(#rows) th:nth-child(2),
+  .card:has(#rows) td:nth-child(2){
+    width: 14%;
+  }
+
+  .card:has(#rows) th:nth-child(3),
+  .card:has(#rows) td:nth-child(3){
+    width: 8%;
+    text-align: center;
+  }
+
+  .card:has(#rows) th:nth-child(4),
+  .card:has(#rows) td:nth-child(4){
+    width: 9%;
+    text-align: center;
+  }
+
+  .card:has(#rows) th:nth-child(5),
+  .card:has(#rows) td:nth-child(5){
+    width: 8%;
+    text-align: center;
+  }
+
+  .card:has(#rows) th:nth-child(6),
+  .card:has(#rows) td:nth-child(6){
+    width: 10%;
+    text-align: center;
+  }
+
+  .card:has(#rows) th:nth-child(7),
+  .card:has(#rows) td:nth-child(7){
+    width: 12%;
+  }
+
+  .card:has(#rows) th:nth-child(8),
+  .card:has(#rows) td:nth-child(8){
+    width: 20%;
+    text-align: center;
+  }
+
+  .card:has(#rows) th:nth-child(9),
+  .card:has(#rows) td:nth-child(9){
+    width: 9%;
+    text-align: center;
+  }
+
+  /* Botones de acciones centrados */
+  .record-actions{
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .record-actions .btn{
+    width: 78px;
+    max-width: 100%;
+  }
+
+  /* Tablas de resumen */
+  .card:has(#sumPedidos) table,
+  .card:has(#sumPersonas) table{
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .card:has(#sumPedidos) th,
+  .card:has(#sumPedidos) td,
+  .card:has(#sumPersonas) th,
+  .card:has(#sumPersonas) td{
+    text-align: center;
+  }
+
+  .card:has(#sumPedidos) th:first-child,
+  .card:has(#sumPedidos) td:first-child,
+  .card:has(#sumPersonas) th:first-child,
+  .card:has(#sumPersonas) td:first-child{
+    text-align: left;
+  }
+}
+
+
+/* =====================================================
+   TELÉFONO
+   Mantiene desplazamiento cuando haga falta
+   ===================================================== */
+
+@media (max-width: 899px){
+
+  .tableWrap{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableWrap table{
+    min-width: 900px;
+    table-layout: auto;
+  }
+
+  .products-cell{
+    min-width: 230px;
+    text-align: center;
+  }
+
+  .record-actions{
+    min-width: 85px;
+  }
+}
