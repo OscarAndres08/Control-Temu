@@ -621,12 +621,7 @@ body.modal-open{
     table-layout: fixed;
   }
 
-  .card:has(#sumPedidos) th,
-  .card:has(#sumPedidos) td,
-  .card:has(#sumPersonas) th,
-  .card:has(#sumPersonas) td{
-    text-align: center;
-  }
+
 
   .card:has(#sumPedidos) th:first-child,
   .card:has(#sumPedidos) td:first-child,
@@ -662,4 +657,13 @@ body.modal-open{
   .record-actions{
     min-width: 85px;
   }
+}
+
+/* Centrar columnas en los resúmenes */
+.card:has(#sumPedidos) th,
+.card:has(#sumPedidos) td,
+.card:has(#sumPersonas) th,
+.card:has(#sumPersonas) td{
+  text-align: center;
+  vertical-align: middle;
 }
