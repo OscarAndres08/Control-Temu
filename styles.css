@@ -456,3 +456,44 @@ body.modal-open{
 .record-actions .btn{
   width: 100%;
 }
+
+.tableWrap{
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-left: 0;
+}
+
+.tableWrap table{
+  width: 100%;
+  min-width: 1050px;
+  margin-left: 0;
+}
+
+.tableWrap th:first-child,
+.tableWrap td:first-child{
+  padding-left: 14px;
+  min-width: 115px;
+}
+
+.products-cell{
+  min-width: 260px;
+  line-height: 1.6;
+}
+
+.product-line{
+  display: block;
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+
+.record-actions{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 85px;
+}
+
+.record-actions .btn{
+  width: 100%;
+}
