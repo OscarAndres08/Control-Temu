@@ -440,6 +440,7 @@ function openModal(row){
   if ($("modalMsg")) $("modalMsg").textContent = "";
 
   if ($("m_pedido_id")) $("m_pedido_id").value = row.pedido_id ?? "";
+  if ($("m_fecha")) $("m_fecha").value = row.fecha ?? "";
   if ($("m_persona")) $("m_persona").value = row.persona ?? "";
   if ($("m_total")) $("m_total").value = row.total ?? 0;
   if ($("m_abonado")) $("m_abonado").value = row.abonado ?? 0;
@@ -468,6 +469,7 @@ on("btnUpdate","click", async () => {
   const originalRow = cache.find(x => x.id === currentEditId);
   const payload = {
     pedido_id: $("m_pedido_id")?.value.trim() || "",
+    fecha: $("m_fecha")?.value || null,
     persona: $("m_persona")?.value.trim() || "",
     total: modalProducts.length ? productsTotal(modalProducts) : num($("m_total")?.value),
     abonado: num($("m_abonado")?.value),
@@ -672,7 +674,6 @@ function render(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${escHtml(r.pedido_id)}</td>
-      <td>${escHtml(r.fecha ?? "")}</td>
       <td>${escHtml(r.persona)}</td>
       <td>${money(r.total)}</td>
       <td>${money(r.abonado)}</td>
