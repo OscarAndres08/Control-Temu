@@ -1,0 +1,24 @@
+CONTROL PEDIDOS · ACTUALIZACIÓN 1.1
+
+NOVEDADES
+- Compartir cuenta por WhatsApp sin guardar teléfonos. Abrí Compartir cuenta en un registro (pedido de esa persona) o en Resumen por persona (cuenta pendiente). Revisá o editá el texto; elegí el contacto y confirmá el envío en WhatsApp. También podés copiar el mensaje.
+- El selector permite cuenta pendiente de pedidos abiertos o un pedido específico. Un pedido específico incluye sus registros pagados y pendientes. La cuenta pendiente incluye únicamente registros con saldo positivo en pedidos abiertos. No se incluyen notas privadas ni información de otras personas. La identificación de personas sigue basándose en su nombre exacto.
+- Agregar abono: elegí el registro de la persona, ingresá únicamente el nuevo pago y guardá. Suma al acumulado, muestra el saldo restante, bloquea montos superiores al saldo y pedidos cerrados.
+- Nuevo logo en encabezado e iconos de instalación.
+
+INSTALACIÓN
+1. Conservá una copia de los archivos de tu sitio actual.
+2. Subí TODO el contenido de APP_PEDIDOS al mismo alojamiento de la app. Incluí features.js, sw.js, los iconos, manifest.webmanifest, app.js, styles.css e index.html.
+3. Abrí la app con internet y recargá la página. Cerrá y volvé a abrir la app instalada. Si el sistema conserva el icono anterior, desinstalá el acceso de la PWA y volvé a instalarlo desde el navegador.
+4. No necesitás SQL nuevo para compartir o agregar abonos si tu app original ya funciona. Se incluye tu ACTUALIZAR_TABLA_PRODUCTOS.sql sin cambios como referencia; no crea la base completa ni se ejecuta automáticamente.
+
+ALCANCE
+- Conserva conexión y tablas existentes de Supabase. No modifica datos al instalar los archivos.
+- El abono utiliza el campo abonado existente: no incorpora un historial de pagos ni recibos individuales.
+- Verifica cambios concurrentes de monto/total antes de actualizar; si otra sesión cambió el registro, solicita actualizar y revisar. Ante una interrupción de red, verificá el saldo antes de repetir.
+- Requiere internet y las políticas de Supabase correctamente configuradas. Esta entrega no audita ni cambia la base remota.
+- No envía mensajes automáticamente. El usuario realiza el envío en WhatsApp.
+- Pruebas de lógica con datos simulados: saldos, aislamiento por persona, URL sin teléfono, suma de abonos, doble clic y conflictos de actualización. Sintaxis JavaScript verificada. Pendiente la comprobación visual en navegador, la conexión a tu Supabase real y el envío en tu dispositivo.
+
+LOGO
+Generado con la herramienta integrada de imágenes. Prompt: icono cuadrado para Control Pedidos, bolsa geométrica con marca de verificación, verde menta e índigo, fondo azul oscuro, sin texto y legible a tamaño pequeño. Original incluido en logo.png.

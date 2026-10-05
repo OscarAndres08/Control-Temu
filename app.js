@@ -168,7 +168,7 @@ function productsTextForRecord(id){
 // ===== PWA: registrar SW =====
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
-    try { await navigator.serviceWorker.register("/sw.js"); } catch (_) {}
+    try { await navigator.serviceWorker.register("./sw.js"); } catch (_) {}
   });
 }
 
@@ -181,7 +181,7 @@ function notify(message, type="info", ms=3200) {
   el.className = `toast toast-${type}`;
   el.innerHTML = `
     <div class="toast-dot"></div>
-    <div class="toast-msg">${message}</div>
+    <div class="toast-msg">${escHtml(message)}</div>
     <button class="toast-x" aria-label="Cerrar">×</button>
   `;
 
@@ -202,7 +202,7 @@ async function confirmModal(message) {
     overlay.innerHTML = `
       <div class="c-card">
         <div class="c-title">Confirmar</div>
-        <div class="c-msg">${message}</div>
+        <div class="c-msg">${escHtml(message)}</div>
         <div class="c-actions">
           <button class="btn ghost" id="cCancel">Cancelar</button>
           <button class="btn primary" id="cOk">Aceptar</button>
@@ -722,6 +722,11 @@ function render(){
       btnEdit?.addEventListener("click", () => openModal(r));
       btnDel?.addEventListener("click", () => removeRow(r.id));
     }
+    const actions = tr.querySelector(".record-actions");
+    const pay = actionButton("Agregar abono", () => openPayment(r), "primary");
+    pay.disabled = isClosed || cents(s) <= 0;
+    actions.appendChild(pay);
+    actions.appendChild(actionButton("Compartir cuenta", () => openShare(r.persona, r.pedido_id)));
     tbody?.appendChild(tr);
   }
 
@@ -747,7 +752,7 @@ function render(){
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${p.pedido_id}</td>
+      <td>${escHtml(p.pedido_id)}</td>
       <td>${money(p.total)}</td>
       <td>${money(p.abonado)}</td>
       <td>${money(p.saldo)}</td>
@@ -755,14 +760,14 @@ function render(){
       <td class="ta-right">
         ${
           isClosed
-            ? (showClosed ? `<button class="btn ghost btn-sm" data-reopen="${p.pedido_id}">Reabrir</button>` : `<span class="tag closed">Cerrado</span>`)
-            : (canClose ? `<button class="btn ghost btn-sm" data-close="${p.pedido_id}">Cerrar</button>` : `<button class="btn ghost btn-sm" disabled title="Solo se puede cerrar cuando esté Pagado">Cerrar</button>`)
+            ? (showClosed ? `<button class="btn ghost btn-sm" data-reopen="${escHtml(p.pedido_id)}">Reabrir</button>` : `<span class="tag closed">Cerrado</span>`)
+            : (canClose ? `<button class="btn ghost btn-sm" data-close="${escHtml(p.pedido_id)}">Cerrar</button>` : `<button class="btn ghost btn-sm" disabled title="Solo se puede cerrar cuando esté Pagado">Cerrar</button>`)
         }
       </td>
     `;
 
-    tr.querySelector(`[data-close="${p.pedido_id}"]`)?.addEventListener("click", () => closePedido(p.pedido_id));
-    tr.querySelector(`[data-reopen="${p.pedido_id}"]`)?.addEventListener("click", () => reopenPedido(p.pedido_id));
+    tr.querySelector("[data-close]")?.addEventListener("click", () => closePedido(p.pedido_id));
+    tr.querySelector("[data-reopen]")?.addEventListener("click", () => reopenPedido(p.pedido_id));
     sp?.appendChild(tr);
   }
   
@@ -774,12 +779,15 @@ function render(){
     const estPersona = estadoDe(n.saldo); // Pendiente/Pagado
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${n.persona}</td>
+      <td>${escHtml(n.persona)}</td>
       <td>${money(n.total)}</td>
       <td>${money(n.abonado)}</td>
       <td>${money(n.saldo)}</td>
       <td><span class="tag ${estadoClassOf(estPersona)}">${estPersona}</span></td>
     `;
+    const td = document.createElement("td");
+    td.appendChild(actionButton("Compartir cuenta", () => openShare(n.persona)));
+    tr.appendChild(td);
     sn?.appendChild(tr);
   }
 }
@@ -838,7 +846,7 @@ async function load(){
 renderProductEditor("new");
 
 // ===== Boot =====
-(async () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const { data: { session } } = await sb.auth.getSession();
 
   if (session) {
@@ -855,19 +863,11 @@ renderProductEditor("new");
     showAuthed(false);
   }
 
-  sb.auth.onAuthStateChange(async (_event, sessionNow) => {
-    if (!sessionNow) {
-      showAuthed(false);
-      return;
-    }
-    const user = await getUser();
-    if (!user) {
-      await sb.auth.signOut();
-      showAuthed(false);
-      notify("Sesión inválida. Iniciá sesión.", "warn");
-      return;
-    }
-    showAuthed(true);
-    await load();
+  sb.auth.onAuthStateChange((_event, sessionNow) => {
+    setTimeout(async () => {
+      showAuthed(Boolean(sessionNow));
+      if (sessionNow) await load();
+      else { closeFeatureDialogs(); cache = []; productsByRecord = new Map(); }
+    }, 0);
   });
-})();
+});

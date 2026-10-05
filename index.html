@@ -4,20 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Control Pedidos</title>
-  <link rel="stylesheet" href="styles.css?v=10">
-  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#0b1020">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="logo">T</div>
+      <img class="brand-icon" src="icon-192.png?v=11" alt="Logo de Control Pedidos" width="48" height="48">
       <div>
         <div class="title">Control Pedidos</div>
-        <div class="subtitle">Pedidos por persona · Abonos · Resumen automático</div>
+        <div class="subtitle">Pedidos por persona · Abonos · Compartir por WhatsApp</div>
       </div>
     </div>
 
@@ -256,6 +256,7 @@
                   <th>Abonado</th>
                   <th>Saldo</th>
                   <th>Estado</th>
+                <th>Acción</th>
                 </tr>
               </thead>
               <tbody id="sumPersonas"></tbody>
@@ -329,6 +330,25 @@
 
   <div id="toasts" class="toasts"></div>
 
-<script src="app.js?v=10"></script>
+<dialog id="shareDialog" class="feature-dialog" aria-labelledby="shareTitle">
+  <div class="row space"><h2 id="shareTitle">Compartir cuenta</h2><button id="closeShare" class="btn ghost">Cerrar</button></div>
+  <p class="muted">Revisá o editá el mensaje. Elegirás el contacto y confirmarás el envío en WhatsApp.</p>
+  <label for="shareScope">Detalle a compartir</label><select id="shareScope"></select>
+  <label for="shareText">Mensaje</label><textarea id="shareText" rows="15"></textarea>
+  <p id="shareNotice" class="muted small"></p>
+  <div class="row"><button id="copyShare" class="btn ghost">Copiar mensaje</button><a id="whatsappLink" class="btn whatsapp" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a></div>
+</dialog>
+<dialog id="paymentDialog" class="feature-dialog" aria-labelledby="paymentTitle">
+  <div class="row space"><h2 id="paymentTitle">Agregar abono</h2><button id="closePayment" class="btn ghost">Cerrar</button></div>
+  <p id="paymentInfo"></p>
+  <form id="paymentForm">
+    <label for="paymentAmount">Nuevo abono ($)</label>
+    <input id="paymentAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" autocomplete="off">
+    <p id="paymentPreview" class="muted"></p><p id="paymentError" role="alert"></p>
+    <button id="savePayment" class="btn primary" type="submit">Guardar abono</button>
+  </form>
+</dialog>
+<script src="app.js?v=11"></script>
+<script src="features.js?v=11"></script>
 </body>
 </html>

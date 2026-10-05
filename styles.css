@@ -667,3 +667,13 @@ body.modal-open{
   text-align: center;
   vertical-align: middle;
 }
+
+/* Compartir y abonar */
+.brand-icon{width:48px;height:48px;border-radius:14px;object-fit:cover;flex-shrink:0}
+.feature-dialog{box-sizing:border-box;width:min(600px,calc(100% - 24px));max-height:90dvh;overflow:auto;color:var(--txt);background:#101a2d;border:1px solid #334155;border-radius:20px;padding:24px}
+.feature-dialog::backdrop{background:rgba(0,0,0,.75)}
+.feature-dialog h2{margin:0}.feature-dialog textarea{box-sizing:border-box;width:100%;resize:vertical;background:#0b1220;color:var(--txt);border:1px solid #334155;border-radius:10px;padding:12px;font:inherit;line-height:1.5}
+.feature-dialog label{display:block;margin:16px 0 8px}.feature-dialog select,.feature-dialog input{width:100%;box-sizing:border-box}
+.feature-dialog .row{flex-wrap:wrap;gap:10px}.whatsapp{background:#0f7652;color:white;text-decoration:none;display:inline-block}
+#paymentError{color:#fca5a5}.record-actions{flex-wrap:wrap;min-width:180px}#paymentInfo{white-space:pre-line;line-height:1.7}
+@media(max-width:480px){.feature-dialog{padding:18px}.feature-dialog .row .btn{flex-grow:1;text-align:center}}
