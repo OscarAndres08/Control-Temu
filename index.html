@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Control Pedidos</title>
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#0b1020">
   <link rel="apple-touch-icon" href="./icon-192.png">
@@ -14,7 +14,7 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <img class="brand-icon" src="icon-192.png?v=11" alt="Logo de Control Pedidos" width="48" height="48">
+      <img class="brand-icon" src="icon-192.png?v=12" alt="Logo de Control Pedidos" width="48" height="48">
       <div>
         <div class="title">Control Pedidos</div>
         <div class="subtitle">Pedidos por persona · Abonos · Compartir por WhatsApp</div>
@@ -194,21 +194,9 @@
           <span class="switch-text">Mostrar pedidos cerrados</span>
         </div>
 
-        <div class="tableWrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Pedido</th>
-                <th>Persona</th>
-                <th>Total</th>
-                <th>Abonado</th>
-                <th>Saldo</th>
-                <th>Estado</th>
-                <th>Notas</th>
-                <th>Productos</th>
-                <th class="ta-right">Acciones</th>
-              </tr>
-            </thead>
+        <div class="tableWrap records-wrap">
+          <table class="records-table">
+            <thead><tr><th>Pedido</th><th>Persona</th><th>Total</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -348,7 +336,11 @@
     <button id="savePayment" class="btn primary" type="submit">Guardar abono</button>
   </form>
 </dialog>
-<script src="app.js?v=11"></script>
-<script src="features.js?v=11"></script>
+<dialog id="recordDialog" class="feature-dialog" aria-labelledby="recordTitle">
+  <div class="row space"><h2 id="recordTitle">Detalle del registro</h2><button id="closeRecord" class="btn ghost">Cerrar</button></div>
+  <div id="recordContent"></div><div id="recordButtons" class="row detail-actions"></div>
+</dialog>
+<script src="app.js?v=12"></script>
+<script src="features.js?v=12"></script>
 </body>
 </html>

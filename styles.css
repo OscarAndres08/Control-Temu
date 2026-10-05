@@ -409,266 +409,7 @@ body.modal-open{
 .product-subtotal{font-weight:900;white-space:nowrap}
 .product-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .btn-sm{padding:7px 9px;font-size:.8rem}
-.auto-total{background:rgba(79,70,229,.12);cursor:not-allowed}
-.products-cell{min-width:260px;max-width:380px;white-space:normal;line-height:1.4}
-.modal-products{margin-top:14px}
-.modal-actions{margin-top:14px}
-
-@media (max-width:760px){
-  .product-form{grid-template-columns:1fr 1fr}
-  .product-form > div:first-child{grid-column:1 / -1}
-  .product-add-wrap{grid-column:1 / -1}
-  .product-item{grid-template-columns:1fr auto}
-  .product-actions{grid-column:1 / -1;justify-content:stretch}
-  .product-actions .btn{flex:1}
-  .products-heading{align-items:flex-start;flex-direction:column}
-}
-
-@media (max-width:480px){
-  .product-form{grid-template-columns:1fr}
-  .product-form > div:first-child,
-  .product-add-wrap{grid-column:auto}
-}
-
-.products-cell{
-  min-width: 260px;
-  max-width: 380px;
-  line-height: 1.5;
-}
-
-.product-line{
-  display: block;
-  margin-bottom: 6px;
-  white-space: nowrap;
-}
-
-.product-line:last-child{
-  margin-bottom: 0;
-}
-
-.record-actions{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 82px;
-}
-
-.record-actions .btn{
-  width: 100%;
-}
-
-.tableWrap{
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  padding-left: 0;
-}
-
-.tableWrap table{
-  width: 100%;
-  min-width: 1050px;
-  margin-left: 0;
-}
-
-.tableWrap th:first-child,
-.tableWrap td:first-child{
-  padding-left: 14px;
-  min-width: 115px;
-}
-
-.products-cell{
-  min-width: 260px;
-  line-height: 1.6;
-}
-
-.product-line{
-  display: block;
-  margin-bottom: 6px;
-  white-space: nowrap;
-}
-
-.record-actions{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 85px;
-}
-
-.record-actions .btn{
-  width: 100%;
-}
-
-/* =====================================================
-   AJUSTES DE TABLAS Y PRODUCTOS
-   ===================================================== */
-
-/* Centrar la columna de productos */
-.products-cell{
-  text-align: center;
-  vertical-align: middle;
-}
-
-.product-line{
-  display: block;
-  width: 100%;
-  text-align: center;
-  margin: 3px 0;
-  white-space: normal;
-}
-
-/* Centrar el encabezado Productos */
-.card:has(#rows) th:nth-child(8){
-  text-align: center;
-}
-
-
-/* =====================================================
-   COMPUTADORA
-   Evita la barra horizontal inferior
-   ===================================================== */
-
-@media (min-width: 900px){
-
-  .tableWrap{
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  .tableWrap table{
-    width: 100%;
-    min-width: 0 !important;
-    table-layout: fixed;
-  }
-
-  .tableWrap th,
-  .tableWrap td{
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
-    vertical-align: middle;
-  }
-
-  /* Tabla principal de registros */
-  .card:has(#rows) th:nth-child(1),
-  .card:has(#rows) td:nth-child(1){
-    width: 10%;
-  }
-
-  .card:has(#rows) th:nth-child(2),
-  .card:has(#rows) td:nth-child(2){
-    width: 14%;
-  }
-
-  .card:has(#rows) th:nth-child(3),
-  .card:has(#rows) td:nth-child(3){
-    width: 8%;
-    text-align: center;
-  }
-
-  .card:has(#rows) th:nth-child(4),
-  .card:has(#rows) td:nth-child(4){
-    width: 9%;
-    text-align: center;
-  }
-
-  .card:has(#rows) th:nth-child(5),
-  .card:has(#rows) td:nth-child(5){
-    width: 8%;
-    text-align: center;
-  }
-
-  .card:has(#rows) th:nth-child(6),
-  .card:has(#rows) td:nth-child(6){
-    width: 10%;
-    text-align: center;
-  }
-
-  .card:has(#rows) th:nth-child(7),
-  .card:has(#rows) td:nth-child(7){
-    width: 12%;
-  }
-
-  .card:has(#rows) th:nth-child(8),
-  .card:has(#rows) td:nth-child(8){
-    width: 20%;
-    text-align: center;
-  }
-
-  .card:has(#rows) th:nth-child(9),
-  .card:has(#rows) td:nth-child(9){
-    width: 9%;
-    text-align: center;
-  }
-
-  /* Botones de acciones centrados */
-  .record-actions{
-    width: 100%;
-    min-width: 0;
-    align-items: center;
-  }
-
-  .record-actions .btn{
-    width: 78px;
-    max-width: 100%;
-  }
-
-  /* Tablas de resumen */
-  .card:has(#sumPedidos) table,
-  .card:has(#sumPersonas) table{
-    width: 100%;
-    min-width: 0 !important;
-    table-layout: fixed;
-  }
-
-
-
-  .card:has(#sumPedidos) th:first-child,
-  .card:has(#sumPedidos) td:first-child,
-  .card:has(#sumPersonas) th:first-child,
-  .card:has(#sumPersonas) td:first-child{
-    text-align: left;
-  }
-}
-
-
-/* =====================================================
-   TELÉFONO
-   Mantiene desplazamiento cuando haga falta
-   ===================================================== */
-
-@media (max-width: 899px){
-
-  .tableWrap{
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tableWrap table{
-    min-width: 900px;
-    table-layout: auto;
-  }
-
-  .products-cell{
-    min-width: 230px;
-    text-align: center;
-  }
-
-  .record-actions{
-    min-width: 85px;
-  }
-}
-
-/* Centrar columnas en los resúmenes */
-.card:has(#sumPedidos) th,
-.card:has(#sumPedidos) td,
-.card:has(#sumPersonas) th,
-.card:has(#sumPersonas) td{
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Compartir y abonar */
+.auto-total{background:rgba(79,70,229,.12);cursor:not-allowed}/* Compartir y abonar */
 .brand-icon{width:48px;height:48px;border-radius:14px;object-fit:cover;flex-shrink:0}
 .feature-dialog{box-sizing:border-box;width:min(600px,calc(100% - 24px));max-height:90dvh;overflow:auto;color:var(--txt);background:#101a2d;border:1px solid #334155;border-radius:20px;padding:24px}
 .feature-dialog::backdrop{background:rgba(0,0,0,.75)}
@@ -677,3 +418,26 @@ body.modal-open{
 .feature-dialog .row{flex-wrap:wrap;gap:10px}.whatsapp{background:#0f7652;color:white;text-decoration:none;display:inline-block}
 #paymentError{color:#fca5a5}.record-actions{flex-wrap:wrap;min-width:180px}#paymentInfo{white-space:pre-line;line-height:1.7}
 @media(max-width:480px){.feature-dialog{padding:18px}.feature-dialog .row .btn{flex-grow:1;text-align:center}}
+
+/* Tablas compactas: una sola definición para evitar columnas y botones recortados. */
+.tableWrap{overflow-x:auto;overflow-y:hidden;width:100%;max-width:100%}
+.tableWrap table{width:100%;min-width:580px;table-layout:auto;border-collapse:collapse}
+.tableWrap th,.tableWrap td{padding:14px 12px;vertical-align:middle;word-break:normal;overflow-wrap:normal}
+.tableWrap th{font-size:.78rem;color:#94a3b8;font-weight:600;text-align:left}
+.tableWrap td{font-size:.88rem;text-align:left}
+.tableWrap .amount{white-space:nowrap;font-variant-numeric:tabular-nums}
+.records-table td:nth-child(1){font-size:.8rem;color:#a5b4fc;max-width:120px;overflow-wrap:anywhere}
+.records-table td:nth-child(2){max-width:220px;overflow-wrap:anywhere;font-weight:600}
+.records-table th:nth-child(3),.records-table th:nth-child(4),.records-table td:nth-child(3),.records-table td:nth-child(4){text-align:right}
+.records-table .balance{font-weight:700}.records-table tr:last-child td{border-bottom:none}
+.record-actions{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;min-width:0;align-items:center}
+.record-actions .btn{width:auto;flex-shrink:0;white-space:nowrap;word-break:normal;padding:8px 10px}
+.records-table .tag{font-size:.75rem;padding:6px 8px;gap:5px}
+.detail-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.detail-totals>div{padding:12px;border:1px solid #263449;border-radius:12px}
+.detail-totals span{display:block;color:#94a3b8;font-size:.8rem;margin-bottom:6px}.detail-totals strong{font-size:1.15rem}
+.detail-products>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #263449}
+.detail-products small{display:block;color:#94a3b8;margin-top:4px}.detail-products strong{white-space:nowrap}
+.detail-notes{white-space:pre-wrap;overflow-wrap:anywhere;color:#cbd5e1;line-height:1.6}.detail-actions{margin-top:24px}
+#recordTitle{overflow-wrap:anywhere;font-size:1.15rem}
+@media(max-width:600px){.tableWrap table{min-width:580px}.tableWrap th,.tableWrap td{padding:12px 10px}.detail-totals>div{padding:9px}.detail-totals strong{font-size:1rem}}

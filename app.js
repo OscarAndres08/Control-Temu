@@ -379,6 +379,7 @@ on("btnSave","click", async () => {
   if (!r.pedido_id || !r.persona) return notify("Falta ID Pedido o Persona.", "warn");
   if (closedSet.has(r.pedido_id)) return notify("Ese pedido está CERRADO.", "warn");
   if (newProducts.length) r.total = productsTotal(newProducts);
+  r.notas = paymentNotes(r.notas, r.total, r.abonado);
 
   const { data: inserted, error } = await sb.from("temu_pedidos").insert([{
     user_id: user.id,
@@ -444,7 +445,7 @@ function openModal(row){
   if ($("m_persona")) $("m_persona").value = row.persona ?? "";
   if ($("m_total")) $("m_total").value = row.total ?? 0;
   if ($("m_abonado")) $("m_abonado").value = row.abonado ?? 0;
-  if ($("m_notas")) $("m_notas").value = row.notas ?? "";
+  if ($("m_notas")) $("m_notas").value = paymentNotes(row.notas, row.total, row.abonado) || "";
 
   modalProducts = productsForRecord(row.id).map(p => ({ ...p }));
   originalModalProductIds = new Set(modalProducts.filter(p => p.id != null).map(p => String(p.id)));
@@ -480,6 +481,7 @@ on("btnUpdate","click", async () => {
   if (originalRow?.pedido_id && closedSet.has(originalRow.pedido_id)) return ($("modalMsg").textContent = "Pedido CERRADO: no se puede editar.");
   if (closedSet.has(payload.pedido_id)) return ($("modalMsg").textContent = "El nuevo ID pertenece a un pedido cerrado.");
 
+  payload.notas = paymentNotes(payload.notas, payload.total, payload.abonado);
   const { error } = await sb.from("temu_pedidos").update(payload).eq("id", currentEditId);
   if (error) return ($("modalMsg").textContent = error.message);
 
@@ -575,7 +577,7 @@ on("btnExportReg","click", () => {
       abonado: r.abonado,
       saldo: saldo(r.total, r.abonado),
       estado: closedSet.has(r.pedido_id) ? "Cerrado" : estadoDe(saldo(r.total, r.abonado)),
-      notas: r.notas ?? "",
+      notas: paymentNotes(r.notas, r.total, r.abonado) || "",
       productos: productsTextForRecord(r.id)
     }));
   download("temu_registros.csv", toCSV(rows, ["pedido_id","fecha","persona","total","abonado","saldo","estado","notas","productos"]));
@@ -675,58 +677,15 @@ function render(){
     tr.innerHTML = `
       <td>${escHtml(r.pedido_id)}</td>
       <td>${escHtml(r.persona)}</td>
-      <td>${money(r.total)}</td>
-      <td>${money(r.abonado)}</td>
-      <td>${money(s)}</td>
+      <td class="amount">${money(r.total)}</td>
+      <td class="amount balance">${money(s)}</td>
       <td><span class="tag ${estadoClassOf(est)}">${est}</span></td>
-      <td>${escHtml(r.notas ?? "")}</td>
-      <td class="products-cell">
-        ${
-          productsForRecord(r.id).length
-            ? productsForRecord(r.id)
-                .map(p => `
-                  <div class="product-line">
-                    ${num(p.cantidad)} ${escHtml(p.producto)}
-                    × ${money(p.precio_unitario)}
-                    = ${money(productSubtotal(p))}
-                  </div>
-                `)
-                .join("")
-            : '<span class="muted">Sin desglose</span>'
-        }
-      </td>
-      <td>
-        <div class="record-actions">
-          <button
-            class="btn ghost btn-sm"
-            data-edit="${r.id}"
-            ${isClosed ? "disabled" : ""}
-          >
-            Editar
-          </button>
-
-          <button
-            class="btn danger btn-sm"
-            data-del="${r.id}"
-            ${isClosed ? "disabled" : ""}
-          >
-            Borrar
-          </button>
-        </div>
-      </td>
-    `;
-
-    const btnEdit = tr.querySelector(`[data-edit="${r.id}"]`);
-    const btnDel = tr.querySelector(`[data-del="${r.id}"]`);
-    if (!isClosed){
-      btnEdit?.addEventListener("click", () => openModal(r));
-      btnDel?.addEventListener("click", () => removeRow(r.id));
-    }
+      <td><div class="record-actions"></div></td>`;
     const actions = tr.querySelector(".record-actions");
-    const pay = actionButton("Agregar abono", () => openPayment(r), "primary");
-    pay.disabled = isClosed || cents(s) <= 0;
-    actions.appendChild(pay);
-    actions.appendChild(actionButton("Compartir cuenta", () => openShare(r.persona, r.pedido_id)));
+    actions.appendChild(actionButton("Ver detalle", () => openRecordDetails(r)));
+    if (!isClosed && cents(s) > 0) {
+      actions.appendChild(actionButton("Abonar", () => openPayment(r), "primary"));
+    }
     tbody?.appendChild(tr);
   }
 

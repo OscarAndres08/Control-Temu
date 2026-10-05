@@ -1,6 +1,8 @@
-CONTROL PEDIDOS · ACTUALIZACIÓN 1.1
+CONTROL PEDIDOS · ACTUALIZACIÓN 1.2
 
 NOVEDADES
+- Tabla minimalista: Pedido, Persona, Total, Saldo, Estado y Acciones. Ver detalle muestra fecha, productos, abonos, notas y opciones de compartir/editar/eliminar. Abonar queda directamente en la fila.
+- Al completar un pago se agrega una línea Cancelado en notas, conservando las observaciones anteriores. También se aplica al guardar/editar un registro pagado de total positivo. Si vuelve a tener saldo al editar, se retira esa línea automática. Los registros pagados anteriores muestran la marca en detalle y exportación; se persiste al guardarlos, sin migración masiva.
 - Compartir cuenta por WhatsApp sin guardar teléfonos. Abrí Compartir cuenta en un registro (pedido de esa persona) o en Resumen por persona (cuenta pendiente). Revisá o editá el texto; elegí el contacto y confirmá el envío en WhatsApp. También podés copiar el mensaje.
 - El selector permite cuenta pendiente de pedidos abiertos o un pedido específico. Un pedido específico incluye sus registros pagados y pendientes. La cuenta pendiente incluye únicamente registros con saldo positivo en pedidos abiertos. No se incluyen notas privadas ni información de otras personas. La identificación de personas sigue basándose en su nombre exacto.
 - Agregar abono: elegí el registro de la persona, ingresá únicamente el nuevo pago y guardá. Suma al acumulado, muestra el saldo restante, bloquea montos superiores al saldo y pedidos cerrados.
@@ -18,7 +20,7 @@ ALCANCE
 - Verifica cambios concurrentes de monto/total antes de actualizar; si otra sesión cambió el registro, solicita actualizar y revisar. Ante una interrupción de red, verificá el saldo antes de repetir.
 - Requiere internet y las políticas de Supabase correctamente configuradas. Esta entrega no audita ni cambia la base remota.
 - No envía mensajes automáticamente. El usuario realiza el envío en WhatsApp.
-- Pruebas de lógica con datos simulados: saldos, aislamiento por persona, URL sin teléfono, suma de abonos, doble clic y conflictos de actualización. Sintaxis JavaScript verificada. Pendiente la comprobación visual en navegador, la conexión a tu Supabase real y el envío en tu dispositivo.
+- Pruebas en navegador con datos simulados: tabla a 1366 × 768 sin recorte horizontal, detalle de productos, diálogo móvil y ausencia de errores JavaScript. Pruebas de lógica: saldos, aislamiento por persona, URL sin teléfono, suma de abonos, doble clic y conflictos de actualización. Sintaxis JavaScript verificada. Pendiente verificar la conexión a tu Supabase real y el envío en tu dispositivo.
 
 LOGO
 Generado con la herramienta integrada de imágenes. Prompt: icono cuadrado para Control Pedidos, bolsa geométrica con marca de verificación, verde menta e índigo, fondo azul oscuro, sin texto y legible a tamaño pequeño. Original incluido en logo.png.

@@ -10,7 +10,7 @@ function actionButton(label, callback, style = "ghost") {
   return button;
 }
 function closeFeatureDialogs() {
-  $("shareDialog")?.close(); $("paymentDialog")?.close(); paymentRecord = null;
+  $("recordDialog")?.close(); $("shareDialog")?.close(); $("paymentDialog")?.close(); paymentRecord = null;
   if ($("shareText")) $("shareText").value = "";
   $("whatsappLink")?.removeAttribute("href");
 }
@@ -102,9 +102,12 @@ on("paymentForm", "submit", async e => {
     if (closed.error) throw closed.error;
     if (closed.data?.length) throw new Error("Este pedido está cerrado. Actualizá los registros.");
     // Compare-and-set: evita sobrescribir un abono cambiado desde otro dispositivo.
-    let query = sb.from("temu_pedidos").update({abonado: (cents(row.abonado) + amount) / 100})
+    const nextPaid = (cents(row.abonado) + amount) / 100;
+    const payload = {abonado: nextPaid, notas: paymentNotes(row.notas, row.total, nextPaid)};
+    let query = sb.from("temu_pedidos").update(payload)
       .eq("id", row.id).eq("user_id", user.id).eq("total", row.total).eq("pedido_id", row.pedido_id);
     query = row.abonado == null ? query.is("abonado", null) : query.eq("abonado", row.abonado);
+    query = row.notas == null ? query.is("notas", null) : query.eq("notas", row.notas);
     const result = await query.select("id");
     if (result.error) throw result.error;
     if (!result.data?.length) throw new Error("El registro cambió o no tenés permiso. Cerrá esta ventana, actualizá y revisá el saldo antes de intentarlo otra vez.");
@@ -117,3 +120,33 @@ on("paymentForm", "submit", async e => {
     $("savePayment").textContent = "Guardar abono";
   }
 });
+
+// La marca de pago no borra las observaciones existentes.
+function paymentNotes(notes, total, paid) {
+  const lines = String(notes || "").split(/\r?\n/).filter(line => line.trim().toLowerCase() !== "cancelado");
+  const clean = lines.join("\n").trim();
+  return [clean, cents(total) > 0 && cents(paid) >= cents(total) ? "Cancelado" : ""].filter(Boolean).join("\n") || null;
+}
+function openRecordDetails(row) {
+  const closed = closedSet.has(row.pedido_id);
+  $("recordTitle").textContent = `${row.persona} · ${row.pedido_id}`;
+  const products = productsForRecord(row.id);
+  $("recordContent").innerHTML = `
+    <p class="muted">Fecha: ${escHtml(row.fecha || "Sin fecha")}${closed ? " · Pedido cerrado" : ""}</p>
+    <div class="detail-totals">
+      <div><span>Total</span><strong>${money(row.total)}</strong></div>
+      <div><span>Abonado</span><strong>${money(row.abonado)}</strong></div>
+      <div><span>Saldo</span><strong>${money((cents(row.total)-cents(row.abonado))/100)}</strong></div>
+    </div>
+    <h3>Productos</h3>
+    <div class="detail-products">${products.length ? products.map(product => `<div><span>${escHtml(product.producto)}<small>${num(product.cantidad)} × ${money(product.precio_unitario)}</small></span><strong>${money(productSubtotal(product))}</strong></div>`).join("") : '<p class="muted">Sin desglose de productos.</p>'}</div>
+    <h3>Notas</h3><p class="detail-notes">${escHtml(paymentNotes(row.notas,row.total,row.abonado) || "Sin notas")}</p>`;
+  const buttons = $("recordButtons"); buttons.replaceChildren();
+  buttons.appendChild(actionButton("Compartir cuenta", () => {$("recordDialog").close();openShare(row.persona,row.pedido_id)}));
+  if (!closed) {
+    buttons.appendChild(actionButton("Editar", () => {$("recordDialog").close();openModal(row)}));
+    buttons.appendChild(actionButton("Eliminar", async () => {$("recordDialog").close();await removeRow(row.id)}, "danger"));
+  }
+  $("recordDialog").showModal();
+}
+on("closeRecord", "click", () => $("recordDialog").close());
