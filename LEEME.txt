@@ -1,8 +1,9 @@
-CONTROL PEDIDOS · ACTUALIZACIÓN 1.2
+CONTROL PEDIDOS · ACTUALIZACIÓN 1.3
 
 NOVEDADES
+- Encabezados, valores, estados y botones centrados en las tres tablas: registros, resumen por pedido y resumen por persona.
 - Tabla minimalista: Pedido, Persona, Total, Saldo, Estado y Acciones. Ver detalle muestra fecha, productos, abonos, notas y opciones de compartir/editar/eliminar. Abonar queda directamente en la fila.
-- Al completar un pago se agrega una línea Cancelado en notas, conservando las observaciones anteriores. También se aplica al guardar/editar un registro pagado de total positivo. Si vuelve a tener saldo al editar, se retira esa línea automática. Los registros pagados anteriores muestran la marca en detalle y exportación; se persiste al guardarlos, sin migración masiva.
+- Al completar un pago las notas se reemplazan por Cancelado, borrando las observaciones anteriores. También se aplica al guardar/editar un registro pagado de total positivo. Si vuelve a tener saldo al editar, se retira esa marca automática; la nota borrada no se recupera. Los registros pagados anteriores muestran la marca en detalle y exportación; se persiste al guardarlos, sin migración masiva.
 - Compartir cuenta por WhatsApp sin guardar teléfonos. Abrí Compartir cuenta en un registro (pedido de esa persona) o en Resumen por persona (cuenta pendiente). Revisá o editá el texto; elegí el contacto y confirmá el envío en WhatsApp. También podés copiar el mensaje.
 - El selector permite cuenta pendiente de pedidos abiertos o un pedido específico. Un pedido específico incluye sus registros pagados y pendientes. La cuenta pendiente incluye únicamente registros con saldo positivo en pedidos abiertos. No se incluyen notas privadas ni información de otras personas. La identificación de personas sigue basándose en su nombre exacto.
 - Agregar abono: elegí el registro de la persona, ingresá únicamente el nuevo pago y guardá. Suma al acumulado, muestra el saldo restante, bloquea montos superiores al saldo y pedidos cerrados.

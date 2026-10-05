@@ -1,5 +1,5 @@
-const CACHE = 'control-pedidos-v12';
-const ASSETS = ['./','./index.html','./styles.css?v=12','./app.js?v=12','./features.js?v=12','./manifest.webmanifest','./icon-192.png?v=12','./icon-512.png?v=12'];
+const CACHE = 'control-pedidos-v13';
+const ASSETS = ['./','./index.html','./styles.css?v=13','./app.js?v=13','./features.js?v=13','./manifest.webmanifest','./icon-192.png?v=13','./icon-512.png?v=13'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

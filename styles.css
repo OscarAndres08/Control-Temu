@@ -441,3 +441,20 @@ body.modal-open{
 .detail-notes{white-space:pre-wrap;overflow-wrap:anywhere;color:#cbd5e1;line-height:1.6}.detail-actions{margin-top:24px}
 #recordTitle{overflow-wrap:anywhere;font-size:1.15rem}
 @media(max-width:600px){.tableWrap table{min-width:580px}.tableWrap th,.tableWrap td{padding:12px 10px}.detail-totals>div{padding:9px}.detail-totals strong{font-size:1rem}}
+
+/* v1.3: alineación uniforme en registros y ambos resúmenes. */
+.tableWrap table th,.tableWrap table td{ text-align:center !important; vertical-align:middle; }
+.tableWrap table{margin-inline:auto}
+.tableWrap .record-actions{justify-content:center}
+.tableWrap .tag{justify-content:center;white-space:nowrap}
+.tableWrap td{font-variant-numeric:tabular-nums}
+.tableWrap tbody tr:last-child td{border-bottom:0}
+.tableWrap tbody tr:hover{background:rgba(148,163,184,.035)}
+.tableWrap .btn{white-space:nowrap}
+.detail-totals{text-align:center}
+@media(max-width:760px){
+ .product-form{grid-template-columns:1fr 1fr}
+ .product-form>div:first-child{grid-column:1/-1}
+ .product-item{grid-template-columns:minmax(0,1fr) auto}
+ .product-actions{grid-column:1/-1}
+}

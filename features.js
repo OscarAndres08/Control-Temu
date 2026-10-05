@@ -121,11 +121,11 @@ on("paymentForm", "submit", async e => {
   }
 });
 
-// La marca de pago no borra las observaciones existentes.
+// Al completar el pago se reemplazan las notas, según la preferencia del usuario.
 function paymentNotes(notes, total, paid) {
   const lines = String(notes || "").split(/\r?\n/).filter(line => line.trim().toLowerCase() !== "cancelado");
   const clean = lines.join("\n").trim();
-  return [clean, cents(total) > 0 && cents(paid) >= cents(total) ? "Cancelado" : ""].filter(Boolean).join("\n") || null;
+  return cents(total) > 0 && cents(paid) >= cents(total) ? "Cancelado" : clean || null;
 }
 function openRecordDetails(row) {
   const closed = closedSet.has(row.pedido_id);
